@@ -9,6 +9,7 @@
  */
 
 add_action('admin_menu', 'ffse_menu');
+add_action( 'admin_post_nopriv_ffse_export_to_csv', 'ffse_export_button_action' );
 
 function ffse_menu()
 {
@@ -82,20 +83,9 @@ function ffse_render_plugin_settings_page()
     }
 
     echo '<div class="wrap">';
-
     echo '<h2>Fluent Forms Csv Export</h2>';
-
-    // Check whether the button has been pressed AND also check the nonce
-    if (isset($_POST['export_button']) && check_admin_referer('export_button_clicked')) {
-        // the button has been pressed AND we've passed the security check
-        ffse_export_button_action();
-    }
-
-    echo '<form action="admin.php?page=fluent-forms-csv-export" method="post">';
-
-    // this is a WordPress security feature - see: https://codex.wordpress.org/WordPress_Nonces
-    wp_nonce_field('export_button_clicked');
-    echo '<input type="hidden" value="true" name="export_button" />';
+    echo'<form action="'. esc_url( admin_url('admin-post.php') ) . '" method="post">';
+    echo '<input name="action" value="ffse_export_to_csv" type="hidden">';
     submit_button('Export to CSV');
     echo '</form>';
 
