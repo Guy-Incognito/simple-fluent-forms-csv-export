@@ -29,6 +29,19 @@ function ffse_export_button_action()
     if (!isset($_POST['download_csv'])) {
         return;
     }
+    // check nonce
+    if (
+        !isset($_POST['download_csv_nonce'])
+        || !wp_verify_nonce($_POST['download_csv_nonce'], 'download_csv')
+    ) {
+        wp_nonce_ays('');
+    }
+
+    $form_id = 1;
+    if (isset($_POST['form-id'])) {
+        $form_id = $_POST['form-id'];
+    }
+
 
     echo '<div id="message" class="updated fade"><p>'
         . 'Starting export.' . '</p></div>';
@@ -63,7 +76,7 @@ function ffse_export_button_action()
     fputcsv($fp, $header_row);
 
     // retrieve any table data desired. Members is an example
-    $sql_query = "SELECT * FROM " . $table_Name;
+    $sql_query = $wpdb->prepare("SELECT * FROM . $table_Name WHERE form_id = %d", $form_id);
     $rows = $wpdb->get_results($sql_query, ARRAY_A);
     if (!empty($rows)) {
         foreach ($rows as $row) {
@@ -84,11 +97,25 @@ function ffse_render_plugin_settings_page()
         wp_die(__('You do not have sufficient privileges to access this page.'));
     }
 
+    // Get available forms
+    global $wpdb;
+    $table_Name = $wpdb->prefix . 'fluentform_forms';
+    $form_ids = $wpdb->get_results("SELECT id FROM " . $table_Name, ARRAY_A);
+
     echo '<div class="wrap">';
     echo '<h2>Fluent Forms Csv Export</h2>';
 
     echo '<form method="post" id="download_form" action="">';
+    echo '<label for="form-id">Form Id</label>';
+    echo '<select name="form-id" id="form-id">';
+    if (!empty($form_ids)) {
+        foreach ($form_ids as $form_id) {
+            echo '<option value="' . $form_id['id'] . '">' . $form_id['id'] . '</option>';
+        }
+    }
+    echo '</select>';
     echo '<input type="submit" name="download_csv" class="button-primary" value="Export to CSV" />';
+    wp_nonce_field('download_csv', 'download_csv_nonce');
     echo '</form>';
 
     echo '</div>';
