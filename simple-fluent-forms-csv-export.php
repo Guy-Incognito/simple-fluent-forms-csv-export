@@ -9,7 +9,7 @@
  */
 
 add_action('admin_menu', 'ffse_menu');
-add_action( 'admin_post_nopriv_ffse_export_to_csv', 'ffse_export_button_action' );
+add_action("admin_init", "ffse_export_button_action");
 
 function ffse_menu()
 {
@@ -26,6 +26,10 @@ function ffse_menu()
 
 function ffse_export_button_action()
 {
+    if (!isset($_POST['download_csv'])) {
+        return;
+    }
+
     echo '<div id="message" class="updated fade"><p>'
         . 'Starting export.' . '</p></div>';
 
@@ -34,6 +38,8 @@ function ffse_export_button_action()
     // Use headers so the data goes to a file and not displayed
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment; filename="export.csv"');
+    header("Pragma: no-cache");
+    header("Expires: 0");
 
     // clean out other output buffers
     ob_end_clean();
@@ -44,28 +50,24 @@ function ffse_export_button_action()
     $table_Name = $wpdb->prefix . 'fluentform_entry_details';
 
     // get headers
-    $columns = $wpdb->get_col("SHOW columns FROM ".$table_Name);
+    $columns = $wpdb->get_col("SHOW columns FROM " . $table_Name);
 
     // CSV/Excel header label
     $header_row = array();
 
     foreach ($columns as $column) {
-        array_push($header_row, $column[0]);
+        array_push($header_row, $column);
     }
-
 
     //write the header
     fputcsv($fp, $header_row);
 
     // retrieve any table data desired. Members is an example
-    $sql_query = $wpdb->prepare("SELECT * FROM $table_Name", 1);
+    $sql_query = "SELECT * FROM " . $table_Name;
     $rows = $wpdb->get_results($sql_query, ARRAY_A);
     if (!empty($rows)) {
-        foreach ($rows as $Record) {
-            $OutputRecord = array($Record['Email'],
-                $Record['FirstName'],
-                $Record['LastName']);
-            fputcsv($fp, $OutputRecord);
+        foreach ($rows as $row) {
+            fputcsv($fp, $row);
         }
     }
 
@@ -79,18 +81,17 @@ function ffse_render_plugin_settings_page()
 {
     // General check for user permissions.
     if (!current_user_can('manage_options')) {
-        wp_die(__('You do not have sufficient pilchards to access this page.'));
+        wp_die(__('You do not have sufficient privileges to access this page.'));
     }
 
     echo '<div class="wrap">';
     echo '<h2>Fluent Forms Csv Export</h2>';
-    echo'<form action="'. esc_url( admin_url('admin-post.php') ) . '" method="post">';
-    echo '<input name="action" value="ffse_export_to_csv" type="hidden">';
-    submit_button('Export to CSV');
+
+    echo '<form method="post" id="download_form" action="">';
+    echo '<input type="submit" name="download_csv" class="button-primary" value="Export to CSV" />';
     echo '</form>';
 
     echo '</div>';
-
 
 }
 
