@@ -48,7 +48,7 @@ function ffse_export_button_action()
 
     // Use headers so the data goes to a file and not displayed
     header('Content-Type: text/csv');
-    header('Content-Disposition: attachment; filename="export.csv"');
+    header('Content-Disposition: attachment; filename="form_' . $form_id . '_export.csv"');
     header("Pragma: no-cache");
     header("Expires: 0");
 
