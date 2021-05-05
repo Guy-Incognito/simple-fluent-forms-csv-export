@@ -3,9 +3,11 @@
  * Plugin Name: Simple Fluent Forms CSV Export
  * Description: Export Fluent Form Data to CSV
  * Author:      Georg Moser
- * Author URI:  -
+ * Author URI:  https://github.com/Guy-Incognito/simple-fluent-forms-csv-export
  * License URI: -
- * @version
+ * Requires at least: 5.7
+ * Requires PHP:      7.2
+ * Version:           0.0.1
  */
 
 add_action('admin_menu', 'ffse_menu');
@@ -42,10 +44,6 @@ function ffse_export_button_action()
         $form_id = $_POST['form-id'];
     }
 
-
-    echo '<div id="message" class="updated fade"><p>'
-        . 'Starting export.' . '</p></div>';
-
     global $wpdb;
 
     // Use headers so the data goes to a file and not displayed
@@ -76,7 +74,7 @@ function ffse_export_button_action()
     fputcsv($fp, $header_row);
 
     // retrieve any table data desired. Members is an example
-    $sql_query = $wpdb->prepare("SELECT * FROM . $table_Name WHERE form_id = %d", $form_id);
+    $sql_query = $wpdb->prepare("SELECT * FROM `$table_Name` WHERE form_id = %d", $form_id);
     $rows = $wpdb->get_results($sql_query, ARRAY_A);
     if (!empty($rows)) {
         foreach ($rows as $row) {
