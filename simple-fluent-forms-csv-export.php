@@ -13,6 +13,9 @@
 add_action('admin_menu', 'ffse_menu');
 add_action("admin_init", "ffse_export_button_action");
 
+/**
+ * Function appending entry to Wordpress menu.
+ */
 function ffse_menu()
 {
     add_menu_page(
@@ -26,8 +29,12 @@ function ffse_menu()
     );
 }
 
+/**
+ *  Function performing the actual export.
+ */
 function ffse_export_button_action()
 {
+    // Must not print anything here, since this is an export.
     if (!isset($_POST['download_csv'])) {
         return;
     }
@@ -46,7 +53,7 @@ function ffse_export_button_action()
 
     global $wpdb;
 
-    // Use headers so the data goes to a file and not displayed
+    // Set response headers
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment; filename="form_' . $form_id . '_export.csv"');
     header("Pragma: no-cache");
@@ -57,23 +64,21 @@ function ffse_export_button_action()
 
     $fp = fopen('php://output', 'w');
 
-    // retrieve any table data desired. Members is an example
     $table_Name = $wpdb->prefix . 'fluentform_entry_details';
 
-    // get headers
+    // get column names
     $columns = $wpdb->get_col("SHOW columns FROM " . $table_Name);
 
-    // CSV/Excel header label
     $header_row = array();
 
     foreach ($columns as $column) {
         array_push($header_row, $column);
     }
 
-    //write the header
+    // write the header
     fputcsv($fp, $header_row);
 
-    // retrieve any table data desired. Members is an example
+    // retrieve table data
     $sql_query = $wpdb->prepare("SELECT * FROM `$table_Name` WHERE form_id = %d", $form_id);
     $rows = $wpdb->get_results($sql_query, ARRAY_A);
     if (!empty($rows)) {
@@ -83,11 +88,13 @@ function ffse_export_button_action()
     }
 
     fclose($fp);
-    exit;                // Stop any more exporting to the file
+    exit; // Stop export
 
 }
 
-
+/**
+ * Function rendering the admin menu page.
+ */
 function ffse_render_plugin_settings_page()
 {
     // General check for user permissions.
