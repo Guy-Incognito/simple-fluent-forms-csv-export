@@ -53,6 +53,11 @@ function ffse_render_plugin_settings_page()
         }
     }
     echo '</select>';
+    echo '<label for="export-type">Export Type</label>';
+    echo '<select name="export-type" id="export-type">';
+    echo '<option value="table">Table</option>';
+    echo '<option value="transformed">Transformed</option>';
+    echo '</select>';
     echo '<input type="submit" name="download_csv" class="button-primary" value="Export to CSV" />';
     wp_nonce_field('download_csv', 'download_csv_nonce');
     echo '</form>';

@@ -12,7 +12,7 @@
  * License URI: -
  * Requires at least: 5.7
  * Requires PHP:      7.2
- * Version:           0.0.1
+ * Version:           0.0.2
  */
 
 // If this file is called directly, abort.
